@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:gallery/album.dart';
+import 'package:gallery/exceptions.dart';
 import 'package:gallery/picture.dart';
 import 'package:gallery/user.dart';
 import 'package:http/http.dart' as http;
@@ -46,6 +47,8 @@ class ApiService {
       }
       final jsonList = jsonDecode(response.body) as List;
       return jsonList.map((json) => Album.fromJson(json)).toList();
+    } else if (response.statusCode == 404 && response.body.startsWith("User")) {
+      throw UserNotFoundException();
     } else {
       throw Exception('Failed to load albums of user');
     }
@@ -58,6 +61,8 @@ class ApiService {
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return User.fromJson(json);
+    } else if (response.statusCode == 404 && response.body.startsWith("User")) {
+      throw UserNotFoundException();
     } else {
       throw Exception('Failed to load user');
     }
@@ -71,6 +76,8 @@ class ApiService {
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return json['count'];
+    } else if (response.statusCode == 404 && response.body.startsWith("User")) {
+      throw UserNotFoundException();
     } else {
       throw Exception('Failed to load user');
     }
@@ -88,6 +95,9 @@ class ApiService {
       }
       final jsonList = jsonDecode(response.body) as List;
       return jsonList.map((json) => Picture.fromJson(json)).toList();
+    } else if (response.statusCode == 404 &&
+        response.body.startsWith("Album")) {
+      throw AlbumNotFoundException();
     } else {
       throw Exception('Failed to load album pictures');
     }
@@ -105,6 +115,9 @@ class ApiService {
       }
       final jsonList = jsonDecode(response.body) as List;
       return jsonList.map((json) => User.fromJson(json)).toList();
+    } else if (response.statusCode == 404 &&
+        response.body.startsWith("Picture")) {
+      throw PictureNotFoundException();
     } else {
       throw Exception('Failed to load picture tags');
     }
@@ -117,7 +130,17 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'name': name, 'user_id': userId}),
     );
-    return response.statusCode == 200;
+    if (response.statusCode == 200) {
+      return true;
+    }
+    if (response.statusCode == 404 && response.body.startsWith("User")) {
+      throw UserNotFoundException();
+    } else if (response.statusCode == 409 &&
+        response.body.startsWith("Album")) {
+      throw AlbumAlreadyExistsException();
+    } else {
+      throw Exception('Failed to create album');
+    }
   }
 
   Future<bool> createUser(String name) async {
@@ -126,7 +149,15 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'name': name}),
     );
-    return response.statusCode == 200;
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    if (response.statusCode == 409 && response.body.startsWith("User")) {
+      throw UserAlreadyExistsException();
+    } else {
+      throw Exception('Failed to create user');
+    }
   }
 
   Future<bool> tagUserInPicture(
@@ -140,7 +171,19 @@ class ApiService {
         'user_id': userId
       }),
     );
-    return response.statusCode == 200;
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    if (response.statusCode == 404 && response.body.startsWith("Picture")) {
+      throw PictureNotFoundException();
+    } else if (response.statusCode == 404 && response.body.startsWith("User")) {
+      throw UserNotFoundException();
+    } else if (response.statusCode == 409 && response.body.startsWith("Tag")) {
+      throw TagAlreadyExistsException();
+    } else {
+      throw Exception('Failed to tag user in picture');
+    }
   }
 
   Future<bool> addPictureToAlbum(
@@ -151,7 +194,18 @@ class ApiService {
       body: jsonEncode(
           {'album_name': albumName, 'picture_name': pictureName, 'path': path}),
     );
-    return response.statusCode == 200;
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    if (response.statusCode == 404 && response.body.startsWith("Album")) {
+      throw AlbumNotFoundException();
+    } else if (response.statusCode == 409 &&
+        response.body.startsWith("Picture")) {
+      throw PictureAlreadyExistsException();
+    } else {
+      throw Exception('Failed to add picture to album');
+    }
   }
 
   // data deletion methods
@@ -166,7 +220,16 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'id': userId}),
     );
-    return response.statusCode == 200;
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    if (response.statusCode == 404 && response.body.startsWith("User")) {
+      throw UserNotFoundException();
+    } else {
+      throw Exception('Failed to delete user');
+    }
   }
 
   Future<bool> deleteAlbum(String name, int userId) async {
@@ -175,7 +238,16 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'name': name, 'user_id': userId}),
     );
-    return response.statusCode == 200;
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    if (response.statusCode == 404 && response.body.startsWith("Album")) {
+      throw AlbumNotFoundException();
+    } else {
+      throw Exception('Failed to delete album');
+    }
   }
 
   Future<bool> removePictureFromAlbum(
@@ -185,7 +257,19 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'album_name': albumName, 'picture_name': pictureName}),
     );
-    return response.statusCode == 200;
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    if (response.statusCode == 404 && response.body.startsWith("Album")) {
+      throw AlbumNotFoundException();
+    } else if (response.statusCode == 404 &&
+        response.body.startsWith("Picture")) {
+      throw PictureNotFoundException();
+    } else {
+      throw Exception('Failed to remove picture from album');
+    }
   }
 
   Future<bool> untagUserInPicture(
@@ -199,6 +283,22 @@ class ApiService {
         'user_id': userId
       }),
     );
-    return response.statusCode == 200;
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    if (response.statusCode == 404 && response.body.startsWith("Picture")) {
+      throw PictureNotFoundException();
+    } else if (response.statusCode == 404 && response.body.startsWith("User")) {
+      throw UserNotFoundException();
+    } else if (response.statusCode == 404 && response.body.startsWith("Tag")) {
+      throw TagNotFoundException();
+    } else if (response.statusCode == 404 &&
+        response.body.startsWith("Album")) {
+      throw AlbumNotFoundException();
+    } else {
+      throw Exception('Failed to untag user in picture');
+    }
   }
 }
