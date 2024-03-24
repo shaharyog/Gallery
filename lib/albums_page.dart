@@ -3,13 +3,13 @@ import 'package:gallery/api_service.dart';
 import 'package:gallery/album.dart';
 import 'package:gallery/pictures_page.dart';
 import 'package:gallery/user.dart';
-
+import 'error_dialog.dart';
 import 'create_album_dialog.dart';
 
 class AlbumsPage extends StatefulWidget {
   final ApiService apiService;
 
-  const AlbumsPage({Key? key, required this.apiService});
+  const AlbumsPage({super.key, required this.apiService});
 
   @override
   _AlbumsPageState createState() => _AlbumsPageState();
@@ -23,29 +23,31 @@ class _AlbumsPageState extends State<AlbumsPage> {
   @override
   void initState() {
     super.initState();
-    fetchAlbums();
-    fetchUsers();
+    refresh();
   }
 
-  Future<void> fetchAlbums() async {
-    final fetchedAlbums = await widget.apiService.getAlbums();
-    setState(() {
-      albums = fetchedAlbums;
-    });
-  }
-
-  Future<void> fetchUsers() async {
-    final fetchedUsers = await widget.apiService.getUsers();
-    setState(() {
-      users = fetchedUsers;
-    });
+  Future<void> refresh() async {
+    try {
+      final fetchedAlbums = await widget.apiService.getAlbums();
+      final fetchedUsers = await widget.apiService.getUsers();
+      setState(() {
+        albums = fetchedAlbums;
+        users = fetchedUsers;
+      });
+    } catch (e) {
+      _showErrorDialog(e.toString());
+    }
   }
 
   Future<void> fetchAlbumsOfUser(int userId) async {
-    final fetchedAlbums = await widget.apiService.getAlbumsOfUser(userId);
-    setState(() {
-      albums = fetchedAlbums;
-    });
+    try {
+      final fetchedAlbums = await widget.apiService.getAlbumsOfUser(userId);
+      setState(() {
+        albums = fetchedAlbums;
+      });
+    } catch (e) {
+      _showErrorDialog(e.toString());
+    }
   }
 
   @override
@@ -55,10 +57,7 @@ class _AlbumsPageState extends State<AlbumsPage> {
         title: const Text('Albums'),
         actions: [
           IconButton(
-            onPressed: () {
-              fetchUsers();
-              fetchAlbums();
-            },
+            onPressed: refresh,
             icon: const Icon(Icons.refresh),
           ),
         ],
@@ -90,7 +89,7 @@ class _AlbumsPageState extends State<AlbumsPage> {
                 if (value != null) {
                   fetchAlbumsOfUser(selectedUserId!);
                 } else {
-                  fetchAlbums();
+                  refresh();
                 }
               },
             ),
@@ -110,34 +109,44 @@ class _AlbumsPageState extends State<AlbumsPage> {
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   onDismissed: (direction) async {
-                    await widget.apiService
-                        .deleteAlbum(albums[index].name, albums[index].ownerId);
-                    setState(() {
-                      albums.removeAt(index);
-                    });
+                    try {
+                      await widget.apiService.deleteAlbum(
+                          albums[index].name, albums[index].ownerId);
+                      setState(() {
+                        albums.removeAt(index);
+                      });
+                    } catch (e) {
+                      _showErrorDialog(e.toString());
+                    }
                   },
                   child: ListTile(
                     title: Text(albums[index].name),
                     onTap: () {
                       Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PicturesPage(
-                            albumOwnerID: albums[index].ownerId,
-                            albumName: albums[index].name,
-                            apiService: widget.apiService,
-                            picturesCount: albums[index].picturesCount,
-                            albumOwnerName: albums[index].ownerName,
-                          ),
-                        ),
-                      );
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PicturesPage(
+                              albumOwnerID: albums[index].ownerId,
+                              albumName: albums[index].name,
+                              apiService: widget.apiService,
+                              picturesCount: albums[index].picturesCount,
+                              albumOwnerName: albums[index].ownerName,
+                            ),
+                          )).then((_) {
+                        // Refresh users
+                        refresh();
+                      });
                     },
                     trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                       Text("${albums[index].picturesCount} "),
                       const Icon(Icons.image)
                     ]),
                     subtitle: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Text(albums[index].ownerName),
+                      Text(
+                        albums[index].ownerName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       // dot separator
                       const Text(' • '),
                       Text(albums[index].formattedCreationDate),
@@ -152,7 +161,7 @@ class _AlbumsPageState extends State<AlbumsPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await _showCreateAlbumDialog();
-          fetchAlbums(); // Refresh albums after creation
+          refresh();
         },
         child: const Icon(Icons.add),
       ),
@@ -161,17 +170,23 @@ class _AlbumsPageState extends State<AlbumsPage> {
 
   Future<void> _showCreateAlbumDialog() async {
     final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => CreateAlbumDialog(
-        apiService: widget.apiService,
-        users: users,
-      ),
-    );
+        context: context,
+        builder: (context) => CreateAlbumDialog(
+              apiService: widget.apiService,
+              users: users,
+            ));
     if (result == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Album created successfully')),
       );
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => ErrorDialog(message: message),
+    );
   }
 }
 
@@ -182,12 +197,12 @@ class DropdownMenu<T> extends StatelessWidget {
   final ValueChanged<T?>? onSelected;
 
   const DropdownMenu({
-    Key? key,
+    super.key,
     required this.dropdownMenuEntries,
     this.initialSelection,
     this.label,
     this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

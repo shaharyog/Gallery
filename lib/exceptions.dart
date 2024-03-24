@@ -32,7 +32,7 @@ class AlreadyExistsException implements Exception {
 
   @override
   String toString() {
-    return '$message Already exists: ';
+    return '$message Already exists';
   }
 }
 

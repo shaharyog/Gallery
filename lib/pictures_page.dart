@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gallery/api_service.dart';
+import 'package:gallery/error_dialog.dart';
 import 'package:gallery/picture.dart';
+import 'package:gallery/tags_dialog.dart';
 import 'create_picture_dialog.dart';
 
 class PicturesPage extends StatefulWidget {
@@ -26,33 +28,40 @@ class PicturesPage extends StatefulWidget {
 }
 
 class _PicturesPageState extends State<PicturesPage> {
-  late Future<List<Picture>> _fetchPicturesFuture;
+  late List<Picture> _pictures = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchPicturesFuture = fetchPictures();
+    _refresh();
   }
 
-  Future<List<Picture>> fetchPictures() async {
-    return widget.apiService
-        .getAlbumPictures(widget.albumOwnerID, widget.albumName);
+  Future<void> _fetchPictures() async {
+    try {
+      final pictures = await widget.apiService
+          .getAlbumPictures(widget.albumOwnerID, widget.albumName);
+      setState(() {
+        _pictures = pictures;
+      });
+    } catch (e) {
+      _showErrorDialog('Error fetching pictures: $e');
+    }
   }
 
   Future<void> _showCreatePictureDialog() async {
-    final result = await showDialog<bool>(
+    await showDialog<bool>(
       context: context,
       builder: (context) => CreatePictureDialog(
         apiService: widget.apiService,
         albumName: widget.albumName,
       ),
     );
-    if (result == true) {
-      // Refresh pictures after creating a new picture
-      setState(() {
-        _fetchPicturesFuture = fetchPictures();
-      });
-    }
+
+    _refresh();
+  }
+
+  void _refresh() {
+    _fetchPictures();
   }
 
   @override
@@ -60,40 +69,28 @@ class _PicturesPageState extends State<PicturesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.albumName} - ${widget.albumOwnerName}'),
+        actions: [
+          IconButton(
+            onPressed: _refresh,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
-      body: FutureBuilder<List<Picture>>(
-        future: _fetchPicturesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Display a skeleton loader while fetching pictures
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            // Handle error state
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else if (snapshot.hasData) {
-            // Display fetched pictures
-            final pictures = snapshot.data!;
-            return GridView.builder(
+      body: _pictures.isEmpty
+          ? const Center(
+              child: Text('No pictures found'),
+            )
+          : GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, // Adjust the number of columns as needed
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
               ),
-              itemCount: pictures.length,
+              itemCount: _pictures.length,
               itemBuilder: (context, index) {
-                return _buildPictureTile(pictures[index]);
+                return _buildPictureTile(_pictures[index]);
               },
-            );
-          } else {
-            // Handle empty state
-            return const Center(
-              child: Text('No pictures found'),
-            );
-          }
-        },
-      ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreatePictureDialog,
         child: const Icon(Icons.add),
@@ -102,38 +99,102 @@ class _PicturesPageState extends State<PicturesPage> {
   }
 
   Widget _buildPictureTile(Picture picture) {
-    return GestureDetector(
-      onTap: () {
-        // Handle onTap event if needed
+    return Dismissible(
+      key: Key(picture.id.toString()),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20.0),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      onDismissed: (direction) async {
+        await _deletePicture(picture);
       },
-      child: Stack(
-        children: [
-          Image.file(
-            File(picture.path),
-            width: double.infinity,
-            height: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return const Text('Invalid Image');
-            },
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-              padding: const EdgeInsets.all(4),
-              child: Text(
-                picture.name,
-                style: const TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+      child: GestureDetector(
+        onTap: () async {
+          await showDialog(
+            context: context,
+            builder: (context) => TagsDialog(
+              apiService: widget.apiService,
+              albumName: widget.albumName,
+              pictureName: picture.name,
+              pictureID: picture.id,
+            ), // Show the tags dialog
+          );
+          _refresh();
+        },
+        child: Container(
+          alignment: Alignment.bottomCenter,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              Center(
+                child: Image.file(
+                  File(picture.path),
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Text('Invalid Image');
+                  },
+                ),
               ),
-            ),
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                padding: const EdgeInsets.all(4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      picture.name,
+                      style: const TextStyle(color: Colors.white),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Text(' • '),
+                    Text(picture.formattedCreationDate,
+                        style: const TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    const Text(' • '),
+                    Text('${picture.tagCount} ',
+                        style: const TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    const Icon(Icons.people, color: Colors.white),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deletePicture(Picture picture) async {
+    try {
+      // Call the API service to delete the picture
+      await widget.apiService
+          .removePictureFromAlbum(widget.albumName, picture.name);
+      setState(() {
+        _pictures.remove(picture);
+      });
+    } catch (e) {
+      _showErrorDialog(e.toString());
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => ErrorDialog(
+        message: message,
       ),
     );
   }

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:gallery/api_service.dart';
+import 'package:gallery/error_dialog.dart';
 
 class CreatePictureDialog extends StatefulWidget {
   final ApiService apiService;
   final String albumName;
 
   const CreatePictureDialog({
-    Key? key,
+    super.key,
     required this.apiService,
     required this.albumName,
-  }) : super(key: key);
+  });
 
   @override
   _CreatePictureDialogState createState() => _CreatePictureDialogState();
@@ -53,17 +54,33 @@ class _CreatePictureDialogState extends State<CreatePictureDialog> {
         ),
         TextButton(
           onPressed: () async {
-            // Create the picture using API service
-            final isSuccess = await widget.apiService.addPictureToAlbum(
-              widget.albumName,
-              _pictureName,
-              _picturePath,
-            );
-            Navigator.of(context).pop(isSuccess);
+            try {
+              // Create the picture using API service
+              final isSuccess = await widget.apiService.addPictureToAlbum(
+                widget.albumName,
+                _pictureName,
+                _picturePath,
+              );
+              Navigator.of(context).pop(isSuccess);
+            } catch (e) {
+              // Handle the exception by showing an error dialog
+              _showErrorDialog(e.toString());
+            }
           },
           child: const Text('Create'),
         ),
       ],
+    );
+  }
+
+
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => ErrorDialog(
+        message: message,
+      ),
     );
   }
 }

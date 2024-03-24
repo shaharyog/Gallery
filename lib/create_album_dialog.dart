@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gallery/api_service.dart';
 import 'package:gallery/user.dart';
+import 'error_dialog.dart';
 
 class CreateAlbumDialog extends StatefulWidget {
   final ApiService apiService;
   final List<User> users;
 
-  const CreateAlbumDialog({super.key, required this.apiService, required this.users});
+  const CreateAlbumDialog(
+      {super.key, required this.apiService, required this.users});
 
   @override
   _CreateAlbumDialogState createState() => _CreateAlbumDialogState();
@@ -61,13 +63,35 @@ class _CreateAlbumDialogState extends State<CreateAlbumDialog> {
           onPressed: () async {
             final albumName = _albumNameController.text;
             if (albumName.isNotEmpty) {
-              await widget.apiService.createAlbum(albumName, _selectedUserId);
-              Navigator.pop(context, true); // Pass true to indicate success
+              try {
+                await widget.apiService.createAlbum(albumName, _selectedUserId);
+                Navigator.pop(context, true); // Pass true to indicate success
+              } catch (e) {
+                showDialog(
+                  context: context,
+                  builder: (context) => ErrorDialog(
+                    message: e.toString(),
+                  ),
+                );
+              }
+            } else {
+              _showErrorDialog(
+                'Album name cannot be empty.',
+              );
             }
           },
           child: const Text('Create'),
         ),
       ],
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => ErrorDialog(
+        message: message,
+      ),
     );
   }
 
