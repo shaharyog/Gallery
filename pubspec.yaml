@@ -38,7 +38,6 @@ dependencies:
   http: ^1.2.0
   dynamic_color: ^1.7.0
   intl: ^0.19.0
-  msix: ^3.16.7
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +49,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.1
+  msix: ^3.16.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -92,3 +92,13 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+msix_config:
+  display_name: Gallery
+  publisher_display_name: Shahar Yogev
+  languages: en-us
+  publisher: Shahar Yogev
+  identity_name: magshimim.shaharyogev.gallery
+  msix_version: 1.0.0.0
+  logo_path: C:\Users\yogev\Downloads\GalleryIconTransparent.png
+  capabilities: internetClient
