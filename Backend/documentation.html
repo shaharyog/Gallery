@@ -1,0 +1,1876 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gallery - Backend</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script>
+        hljs.configure({
+            tabReplace: '    ',
+        });
+        hljs.initHighlightingOnLoad();
+    </script>
+    <style>body {
+    position: relative;
+}
+
+h1 {
+    margin-top: 5px;
+}
+
+h1, h2, h3, h4 {
+    color: #2b2b2b;
+}
+
+h2:after {
+    content: ' ';
+}
+
+h5 {
+    font-weight: bold;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+    display: none;
+    position: absolute;
+    margin-left: 8px;
+}
+
+h1:hover a, h2:hover a, h3:hover a, h4:hover a, h5:hover a, h6:hover a {
+    color: #a5a5a5;
+    display: initial;
+}
+
+.nav.nav-tabs > li > a {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.tab-content {
+    padding-top: 8px;
+}
+
+.table {
+    margin-bottom: 8px;
+}
+
+pre {
+    border-radius: 0px;
+    border: none;
+}
+
+pre code {
+    margin: -9.5px;
+}
+
+.request {
+    margin-top: 12px;
+    margin-bottom: 24px;
+}
+
+.response-text-sample {
+    padding: 0px !important;
+}
+
+.response-text-sample pre {
+    margin-bottom: 0px;
+}
+
+
+#sidebar-wrapper {
+    z-index: 1000;
+    position: fixed;
+    left: 250px;
+    width: 250px;
+    height: 100%;
+    margin-left: -250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #2b2b2b;
+    padding-top: 20px;
+}
+
+#sidebar-wrapper ul {
+    width: 250px;
+}
+
+#sidebar-wrapper ul li {
+    margin-right: 10px;
+}
+
+#sidebar-wrapper ul li a:hover {
+    background: inherit;
+    text-decoration: none;
+}
+
+#sidebar-wrapper ul li a {
+    display: block;
+    color: #ECF0F1;
+    padding: 6px 15px;
+}
+
+#sidebar-wrapper ul li ul {
+    padding-left: 25px;
+}
+
+#sidebar-wrapper ul li ul li a {
+    padding: 1px 0px;
+}
+
+#sidebar-wrapper ul li a:hover,
+#sidebar-wrapper ul li a:focus {
+    color: #e0c46c;
+    border-right: solid 1px #e0c46c;
+}
+
+#sidebar-wrapper ul li.active > a {
+    color: #e0c46c;
+    border-right: solid 3px #e0c46c;
+}
+
+#sidebar-wrapper ul li:not(.active) ul {
+    display: none;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    position: absolute;
+    padding: 15px 15px 15px 250px;
+}
+</style>
+</head>
+<body data-spy="scroll" data-target=".scrollspy">
+<div id="sidebar-wrapper">
+    <div class="scrollspy">
+    <ul id="main-menu" data-spy="affix" class="nav">
+        <li>
+            <a href="#doc-general-notes">General notes</a>
+        </li>
+        
+        <li>
+            <a href="#doc-api-detail">API detail</a>
+        </li>
+        
+        
+        
+        <li>
+            <a href="#folder-creation-endpoints">Creation Endpoints</a>
+            <ul>
+                
+                <li>
+                    <a href="#request-creation-endpoints-create-album">Create Album</a>
+                </li>
+                
+                <li>
+                    <a href="#request-creation-endpoints-create-user">Create User</a>
+                </li>
+                
+                <li>
+                    <a href="#request-creation-endpoints-tag-user-in-picture">Tag User In Picture</a>
+                </li>
+                
+                <li>
+                    <a href="#request-creation-endpoints-add-picture-to-album">Add Picture To Album</a>
+                </li>
+                
+            </ul>
+        </li>
+        
+        
+        <li>
+            <a href="#folder-deletion-endpoints">Deletion Endpoints</a>
+            <ul>
+                
+                <li>
+                    <a href="#request-deletion-endpoints-clear-db">Clear DB</a>
+                </li>
+                
+                <li>
+                    <a href="#request-deletion-endpoints-delete-user">Delete User</a>
+                </li>
+                
+                <li>
+                    <a href="#request-deletion-endpoints-delete-album">Delete Album</a>
+                </li>
+                
+                <li>
+                    <a href="#request-deletion-endpoints-remove-picture-from-album">Remove Picture From Album</a>
+                </li>
+                
+                <li>
+                    <a href="#request-deletion-endpoints-untag-user-in-picture">Untag User In Picture</a>
+                </li>
+                
+            </ul>
+        </li>
+        
+        
+        <li>
+            <a href="#folder-retreival-endpoints">Retreival Endpoints</a>
+            <ul>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-albums">Get Albums</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-users">Get Users</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-albums-of-user">Get Albums Of User</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-user">Get User</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-user-albums-count">Get User Albums Count</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-albums-tagged-of-user-count">Get Albums Tagged Of User Count</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-count-tags-of-user">Get Count Tags Of User</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-average-tags-of-user-per-album">Get Average Tags Of User Per Album</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-album-pictures">Get Album Pictures</a>
+                </li>
+                
+                <li>
+                    <a href="#request-retreival-endpoints-get-picture-tags">Get Picture Tags</a>
+                </li>
+                
+            </ul>
+        </li>
+        
+    </ul>
+</div>
+
+</div>
+<div id="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Gallery - Backend</h1>
+
+                <h2 id="doc-general-notes">
+                    General notes
+                    <a href="#doc-general-notes"><i class="glyphicon glyphicon-link"></i></a>
+                </h2>
+
+                <p>StartFragmentThis is a simple RESTful API for managing albums and users in a gallery application.EndFragment</p>
+
+<p><a href="https://gitlab.com/Shahar-Yogev/gallery-backend">Link To repo - Gitlab</a></p>
+
+
+                
+
+                <h2 id="doc-api-detail">
+                    API detail
+                    <a href="#doc-api-detail"><i class="glyphicon glyphicon-link"></i></a>
+                </h2>
+
+                
+
+
+                
+                
+                <div class="endpoints-group">
+                    <h3 id="folder-creation-endpoints">
+                        Creation Endpoints
+                        <a href="#folder-creation-endpoints"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>All endpoints that create some rows in database</p>
+</div>
+
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-creation-endpoints-create-album">
+                            Create Album
+                            <a href="#request-creation-endpoints-create-album"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-creation-endpoints-create-album-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-creation-endpoints-create-album-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-creation-endpoints-create-album-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "name": "New Album",
+    "user_id": 1
+}' "http://localhost:8080/gallery/api/create_album"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-creation-endpoints-create-album-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/create_album HTTP/1.1
+Host: localhost:8080
+
+{
+    "name": "New Album",
+    "user_id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-creation-endpoints-create-album-responses-71ea38ff-2818-4f1e-ac50-82acd74b16b5" data-toggle="tab">
+                                        
+                                            Create Album Success
+                                        
+                                    </a>
+                                </li>
+                                
+                                <li role="presentation">
+                                    <a href="#request-creation-endpoints-create-album-responses-9f11f0c7-1739-497d-bba9-d3b1a9fba7b0" data-toggle="tab">
+                                        
+                                            Create Existing Album
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-creation-endpoints-create-album-responses-71ea38ff-2818-4f1e-ac50-82acd74b16b5">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>27</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 11:01:45 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                                <div class="tab-pane" id="request-creation-endpoints-create-album-responses-9f11f0c7-1739-497d-bba9-d3b1a9fba7b0">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>500 Internal Error</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>31</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:42:23 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-creation-endpoints-create-user">
+                            Create User
+                            <a href="#request-creation-endpoints-create-user"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-creation-endpoints-create-user-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-creation-endpoints-create-user-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-creation-endpoints-create-user-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "name" : "New User"
+}' "http://localhost:8080/gallery/api/create_user"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-creation-endpoints-create-user-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/create_user HTTP/1.1
+Host: localhost:8080
+
+{
+    "name" : "New User"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-creation-endpoints-create-user-responses-54a04b01-b314-43ce-957a-97762c52b697" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-creation-endpoints-create-user-responses-54a04b01-b314-43ce-957a-97762c52b697">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>26</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 11:01:43 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-creation-endpoints-tag-user-in-picture">
+                            Tag User In Picture
+                            <a href="#request-creation-endpoints-tag-user-in-picture"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-creation-endpoints-tag-user-in-picture-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-creation-endpoints-tag-user-in-picture-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-creation-endpoints-tag-user-in-picture-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "album_name" : "New Album",
+    "picture_name" : "New Pic",
+    "user_id" : 1
+}' "http://localhost:8080/gallery/api/tag_user_in_picture"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-creation-endpoints-tag-user-in-picture-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/tag_user_in_picture HTTP/1.1
+Host: localhost:8080
+
+{
+    "album_name" : "New Album",
+    "picture_name" : "New Pic",
+    "user_id" : 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-creation-endpoints-tag-user-in-picture-responses-781cbe47-5155-4257-beeb-635dc49e8545" data-toggle="tab">
+                                        
+                                            Tag User In Picture Success
+                                        
+                                    </a>
+                                </li>
+                                
+                                <li role="presentation">
+                                    <a href="#request-creation-endpoints-tag-user-in-picture-responses-e8031293-0f74-4e1f-b764-bfb13d12a027" data-toggle="tab">
+                                        
+                                            Tag Existing User
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-creation-endpoints-tag-user-in-picture-responses-781cbe47-5155-4257-beeb-635dc49e8545">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>36</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 11:01:50 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                                <div class="tab-pane" id="request-creation-endpoints-tag-user-in-picture-responses-e8031293-0f74-4e1f-b764-bfb13d12a027">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>500 Internal Error</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>31</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:44:25 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-creation-endpoints-add-picture-to-album">
+                            Add Picture To Album
+                            <a href="#request-creation-endpoints-add-picture-to-album"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-creation-endpoints-add-picture-to-album-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-creation-endpoints-add-picture-to-album-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-creation-endpoints-add-picture-to-album-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "album_name": "New Album",
+    "picture_name": "New Pic",
+    "path": "path/to/image"
+}' "http://localhost:8080/gallery/api/add_picture_to_album"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-creation-endpoints-add-picture-to-album-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/add_picture_to_album HTTP/1.1
+Host: localhost:8080
+
+{
+    "album_name": "New Album",
+    "picture_name": "New Pic",
+    "path": "path/to/image"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-creation-endpoints-add-picture-to-album-responses-1187bb52-eb17-4177-8251-33a16c2459e8" data-toggle="tab">
+                                        
+                                            Add Picture To Album Success
+                                        
+                                    </a>
+                                </li>
+                                
+                                <li role="presentation">
+                                    <a href="#request-creation-endpoints-add-picture-to-album-responses-f9145d47-666f-4d07-8ccb-1d7ab3f31abe" data-toggle="tab">
+                                        
+                                            Add Existing Picture
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-creation-endpoints-add-picture-to-album-responses-1187bb52-eb17-4177-8251-33a16c2459e8">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>36</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 11:01:47 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                                <div class="tab-pane" id="request-creation-endpoints-add-picture-to-album-responses-f9145d47-666f-4d07-8ccb-1d7ab3f31abe">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>500 Internal Error</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>31</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:44:02 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+
+                </div>
+                
+                
+                <div class="endpoints-group">
+                    <h3 id="folder-deletion-endpoints">
+                        Deletion Endpoints
+                        <a href="#folder-deletion-endpoints"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div></div>
+
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-deletion-endpoints-clear-db">
+                            Clear DB
+                            <a href="#request-deletion-endpoints-clear-db"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-deletion-endpoints-clear-db-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-deletion-endpoints-clear-db-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-deletion-endpoints-clear-db-example-curl">
+                                    <pre><code class="hljs curl">curl -X DELETE "http://localhost:8080/gallery/api/clear_db"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-deletion-endpoints-clear-db-example-http">
+                                    <pre><code class="hljs http">DELETE /gallery/api/clear_db HTTP/1.1
+Host: localhost:8080</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-deletion-endpoints-clear-db-responses-1b534344-e96f-4a1c-841d-002d616542b1" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-deletion-endpoints-clear-db-responses-1b534344-e96f-4a1c-841d-002d616542b1">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>30</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 11:01:40 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-deletion-endpoints-delete-user">
+                            Delete User
+                            <a href="#request-deletion-endpoints-delete-user"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-deletion-endpoints-delete-user-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-deletion-endpoints-delete-user-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-deletion-endpoints-delete-user-example-curl">
+                                    <pre><code class="hljs curl">curl -X DELETE -d '{
+    "id": 1
+}' "http://localhost:8080/gallery/api/delete_user"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-deletion-endpoints-delete-user-example-http">
+                                    <pre><code class="hljs http">DELETE /gallery/api/delete_user HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-deletion-endpoints-delete-album">
+                            Delete Album
+                            <a href="#request-deletion-endpoints-delete-album"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-deletion-endpoints-delete-album-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-deletion-endpoints-delete-album-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-deletion-endpoints-delete-album-example-curl">
+                                    <pre><code class="hljs curl">curl -X DELETE -d '{
+    "name": "New Album",
+    "user_id": 1
+}' "http://localhost:8080/gallery/api/delete_album"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-deletion-endpoints-delete-album-example-http">
+                                    <pre><code class="hljs http">DELETE /gallery/api/delete_album HTTP/1.1
+Host: localhost:8080
+
+{
+    "name": "New Album",
+    "user_id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-deletion-endpoints-remove-picture-from-album">
+                            Remove Picture From Album
+                            <a href="#request-deletion-endpoints-remove-picture-from-album"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-deletion-endpoints-remove-picture-from-album-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-deletion-endpoints-remove-picture-from-album-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-deletion-endpoints-remove-picture-from-album-example-curl">
+                                    <pre><code class="hljs curl">curl -X DELETE -d '{
+    "album_name" : "New Album",
+    "picture_name" : "New Pic"
+}' "http://localhost:8080/gallery/api/remove_picture_from_album"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-deletion-endpoints-remove-picture-from-album-example-http">
+                                    <pre><code class="hljs http">DELETE /gallery/api/remove_picture_from_album HTTP/1.1
+Host: localhost:8080
+
+{
+    "album_name" : "New Album",
+    "picture_name" : "New Pic"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-deletion-endpoints-remove-picture-from-album-responses-8924a2a3-d4bf-4c57-b7fd-d46b19bd24ae" data-toggle="tab">
+                                        
+                                            Remove Picture From Album Success
+                                        
+                                    </a>
+                                </li>
+                                
+                                <li role="presentation">
+                                    <a href="#request-deletion-endpoints-remove-picture-from-album-responses-25aa8727-26d0-47eb-bcb5-3bb6a0bcddc6" data-toggle="tab">
+                                        
+                                            Remove Undefined Picture From Album
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-deletion-endpoints-remove-picture-from-album-responses-8924a2a3-d4bf-4c57-b7fd-d46b19bd24ae">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>40</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:46:28 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                                <div class="tab-pane" id="request-deletion-endpoints-remove-picture-from-album-responses-25aa8727-26d0-47eb-bcb5-3bb6a0bcddc6">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>500 Internal Error</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>31</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:46:37 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-deletion-endpoints-untag-user-in-picture">
+                            Untag User In Picture
+                            <a href="#request-deletion-endpoints-untag-user-in-picture"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-deletion-endpoints-untag-user-in-picture-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-deletion-endpoints-untag-user-in-picture-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-deletion-endpoints-untag-user-in-picture-example-curl">
+                                    <pre><code class="hljs curl">curl -X DELETE -d '{
+    "album_name" : "New Album",
+    "picture_name" : "New Pic",
+    "user_id" : 1
+}' "http://localhost:8080/gallery/api/untag_user_in_picture"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-deletion-endpoints-untag-user-in-picture-example-http">
+                                    <pre><code class="hljs http">DELETE /gallery/api/untag_user_in_picture HTTP/1.1
+Host: localhost:8080
+
+{
+    "album_name" : "New Album",
+    "picture_name" : "New Pic",
+    "user_id" : 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-deletion-endpoints-untag-user-in-picture-responses-0f19d97f-13a3-4b39-9434-f065f02e0911" data-toggle="tab">
+                                        
+                                            Untag User In Picture Success
+                                        
+                                    </a>
+                                </li>
+                                
+                                <li role="presentation">
+                                    <a href="#request-deletion-endpoints-untag-user-in-picture-responses-46847318-4e9c-4e96-820d-10e2fcae2261" data-toggle="tab">
+                                        
+                                            Untag Undefined User In Picture
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-deletion-endpoints-untag-user-in-picture-responses-0f19d97f-13a3-4b39-9434-f065f02e0911">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>40</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:45:48 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                                <div class="tab-pane" id="request-deletion-endpoints-untag-user-in-picture-responses-46847318-4e9c-4e96-820d-10e2fcae2261">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>500 Internal Error</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>31</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>text/plain; charset=utf-8</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:46:03 GMT</td></tr>
+                                        
+                                        
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+
+                </div>
+                
+                
+                <div class="endpoints-group">
+                    <h3 id="folder-retreival-endpoints">
+                        Retreival Endpoints
+                        <a href="#folder-retreival-endpoints"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div></div>
+
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-albums">
+                            Get Albums
+                            <a href="#request-retreival-endpoints-get-albums"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-albums-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-albums-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-albums-example-curl">
+                                    <pre><code class="hljs curl">curl -X GET "http://localhost:8080/gallery/api/get_albums"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-albums-example-http">
+                                    <pre><code class="hljs http">GET /gallery/api/get_albums HTTP/1.1
+Host: localhost:8080</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-albums-responses-a64f1b17-7ff1-4216-ae3a-1760d9a1f89d" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-albums-responses-a64f1b17-7ff1-4216-ae3a-1760d9a1f89d">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>116</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:45:24 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>[
+    {
+        "creation_date": "2024-03-21T14:43:50",
+        "name": "New Album",
+        "owner_id": 1,
+        "owner_name": "New User",
+        "pictures_count": 1
+    }
+]</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-users">
+                            Get Users
+                            <a href="#request-retreival-endpoints-get-users"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-users-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-users-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-users-example-curl">
+                                    <pre><code class="hljs curl">curl -X GET "http://localhost:8080/gallery/api/get_users"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-users-example-http">
+                                    <pre><code class="hljs http">GET /gallery/api/get_users HTTP/1.1
+Host: localhost:8080</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-users-responses-62d1be88-2528-4531-a0f2-b0d77f418d74" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-users-responses-62d1be88-2528-4531-a0f2-b0d77f418d74">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>190</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:45:36 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>[
+    {
+        "id": 1,
+        "name": "New User"
+    },
+    {
+        "id": 2,
+        "name": "New User"
+    },
+    {
+        "id": 3,
+        "name": "New User"
+    },
+    {
+        "id": 4,
+        "name": "New User"
+    },
+    {
+        "id": 5,
+        "name": "New User"
+    },
+    {
+        "id": 6,
+        "name": "New User"
+    },
+    {
+        "id": 7,
+        "name": "New User"
+    }
+]</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-albums-of-user">
+                            Get Albums Of User
+                            <a href="#request-retreival-endpoints-get-albums-of-user"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-albums-of-user-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-albums-of-user-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-albums-of-user-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "id": 1
+}' "http://localhost:8080/gallery/api/get_albums_of_user"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-albums-of-user-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_albums_of_user HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-albums-of-user-responses-48ebe199-ebbb-4962-a29a-f135b9f99a08" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-albums-of-user-responses-48ebe199-ebbb-4962-a29a-f135b9f99a08">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>116</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:47:25 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>[
+    {
+        "creation_date": "2024-03-21T14:43:50",
+        "name": "New Album",
+        "owner_id": 1,
+        "owner_name": "New User",
+        "pictures_count": 0
+    }
+]</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-user">
+                            Get User
+                            <a href="#request-retreival-endpoints-get-user"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-user-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-user-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-user-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "id": 1
+}' "http://localhost:8080/gallery/api/get_user"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-user-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_user HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-user-responses-acc423e1-785e-45c8-82dc-3cf9f86c9a0e" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-user-responses-acc423e1-785e-45c8-82dc-3cf9f86c9a0e">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>26</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:47:36 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>{
+    "id": 1,
+    "name": "New User"
+}</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-user-albums-count">
+                            Get User Albums Count
+                            <a href="#request-retreival-endpoints-get-user-albums-count"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-user-albums-count-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-user-albums-count-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-user-albums-count-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "id": 1
+}' "http://localhost:8080/gallery/api/get_user_albums_count"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-user-albums-count-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_user_albums_count HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-user-albums-count-responses-a895ccde-f343-469a-8dbe-ccbf7b45b54e" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-user-albums-count-responses-a895ccde-f343-469a-8dbe-ccbf7b45b54e">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>1</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:47:43 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>1</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-albums-tagged-of-user-count">
+                            Get Albums Tagged Of User Count
+                            <a href="#request-retreival-endpoints-get-albums-tagged-of-user-count"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-albums-tagged-of-user-count-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-albums-tagged-of-user-count-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-albums-tagged-of-user-count-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "id": 1
+}' "http://localhost:8080/gallery/api/get_albums_tagged_user_count"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-albums-tagged-of-user-count-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_albums_tagged_user_count HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-albums-tagged-of-user-count-responses-b66783c8-d357-4a66-aa71-820abe73871b" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-albums-tagged-of-user-count-responses-b66783c8-d357-4a66-aa71-820abe73871b">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>1</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:47:52 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>0</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-count-tags-of-user">
+                            Get Count Tags Of User
+                            <a href="#request-retreival-endpoints-get-count-tags-of-user"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-count-tags-of-user-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-count-tags-of-user-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-count-tags-of-user-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "id": 1
+}' "http://localhost:8080/gallery/api/get_count_tags_of_user"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-count-tags-of-user-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_count_tags_of_user HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-count-tags-of-user-responses-f8d1416a-38f9-41f7-8948-794b939e60ac" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-count-tags-of-user-responses-f8d1416a-38f9-41f7-8948-794b939e60ac">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>1</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:48:00 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>0</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-average-tags-of-user-per-album">
+                            Get Average Tags Of User Per Album
+                            <a href="#request-retreival-endpoints-get-average-tags-of-user-per-album"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-average-tags-of-user-per-album-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-average-tags-of-user-per-album-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-average-tags-of-user-per-album-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "id": 1
+}' "http://localhost:8080/gallery/api/get_average_tags_of_user_per_album"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-average-tags-of-user-per-album-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_average_tags_of_user_per_album HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 1
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-average-tags-of-user-per-album-responses-b2438094-194d-4d0a-9f56-0de4a95c0ab3" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-average-tags-of-user-per-album-responses-b2438094-194d-4d0a-9f56-0de4a95c0ab3">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>1</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:48:10 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>0</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-album-pictures">
+                            Get Album Pictures
+                            <a href="#request-retreival-endpoints-get-album-pictures"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-album-pictures-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-album-pictures-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-album-pictures-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "owner_id": 1,
+    "album_name": "New Album"
+}' "http://localhost:8080/gallery/api/get_album_pictures"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-album-pictures-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_album_pictures HTTP/1.1
+Host: localhost:8080
+
+{
+    "owner_id": 1,
+    "album_name": "New Album"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-album-pictures-responses-4a9a710f-159f-467f-9fb2-39b0bbbff309" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-album-pictures-responses-4a9a710f-159f-467f-9fb2-39b0bbbff309">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>102</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:48:57 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>[
+    {
+        "creation_date": "2024-03-21T14:48:52",
+        "id": 2,
+        "name": "New Pic",
+        "path": "path/to/image",
+        "tag_count": 0
+    }
+]</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-retreival-endpoints-get-picture-tags">
+                            Get Picture Tags
+                            <a href="#request-retreival-endpoints-get-picture-tags"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-retreival-endpoints-get-picture-tags-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-retreival-endpoints-get-picture-tags-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-picture-tags-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -d '{
+    "id": 2,
+    "name": "New Pic"
+}' "http://localhost:8080/gallery/api/get_picture_tags"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-retreival-endpoints-get-picture-tags-example-http">
+                                    <pre><code class="hljs http">POST /gallery/api/get_picture_tags HTTP/1.1
+Host: localhost:8080
+
+{
+    "id": 2,
+    "name": "New Pic"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-retreival-endpoints-get-picture-tags-responses-dd643d1a-c64a-43de-99f0-41c5622559eb" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-retreival-endpoints-get-picture-tags-responses-dd643d1a-c64a-43de-99f0-41c5622559eb">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Server</th><td>Microsoft-HTTPAPI/2.0</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Length</th><td>28</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Date</th><td>Thu, 21 Mar 2024 12:49:37 GMT</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>[
+    {
+        "id": 1,
+        "name": "New User"
+    }
+]</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("table:not(.table)").addClass('table table-bordered');
+    });
+</script>
+</body>
+</html>
