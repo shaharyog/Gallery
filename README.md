@@ -1,16 +1,10 @@
-# gallery
+# Gallery Frontend
 
-A Gallery windows application.
+This is a simple GUI (Graphical User Interface) for a gallery application developed in Flutter. The application allows users to view and manage photos and albums in a gallery system. It serves as a quick GUI implementation and is a modified version of a previously developed console application that has been rewritten as a server-based solution.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+## Features
+- View photos in a gallery
+- Manage albums
+- Simple and intuitive user interface
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
